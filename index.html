@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sterling Holding | Premium Finanzverwaltung</title>
+    <style>
+        :root {
+            --bg-body: #000000;
+            --bg-card: #0a0a0a;
+            --accent: #d4af37;
+            --accent-dim: #8a6d3b;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --border: #1a1a1a;
+            --danger: #990000;
+            --success: #1a4d1a;
+            --warning: #cc8400;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Georgia', serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-body);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.05);
+        }
+
+        .logo-large {
+            font-size: 3rem;
+            color: var(--accent);
+            letter-spacing: 8px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .login-card .form-group input {
+            text-align: center;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+
+        .nav-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            display: none;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            padding: 20px 25px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: 0.4s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 1300px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: none;
+        }
+
+        .view { display: none; animation: slideUp 0.6s ease; }
+        .view.active { display: block; }
+
+        @keyframes slideUp { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h2 {
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .form-group { margin-bottom: 25px; }
+        label { 
+            display: block; 
+            margin-bottom: 10px; 
+            color: var(--accent); 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        
+        input, select {
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 14px;
+            color: #fff;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .checkbox-container input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 15px 30px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: 0.3s;
+            font-size: 0.9rem;
+        }
+
+        button:hover {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-full { width: 100%; }
+
+        .result-panel {
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 25px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #111;
+        }
+
+        .result-row:last-child { border-bottom: none; }
+        .result-label { color: var(--text-muted); font-size: 0.9rem; }
+        .result-val { color: var(--accent); font-weight: bold; font-size: 1.2rem; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            text-align: left;
+            color: var(--accent);
+            padding: 15px;
+            border-bottom: 2px solid var(--accent);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+
+        .status-badge {
+            padding: 5px 12px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .unpaid { border: 1px solid var(--warning); color: var(--warning); }
+        .paid { border: 1px solid var(--success); color: var(--success); }
+        .withdrawn { border: 1px solid var(--danger); color: var(--danger); }
+
+        .blacklist-card {
+            border: 1px solid var(--danger);
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #error-msg {
+            color: var(--danger);
+            margin-top: 20px;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        footer {
+            padding: 50px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .qol-copy {
+            background: #111;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border: 1px dashed var(--border);
+            white-space: pre-line;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <div class="logo-large">Sterling</div>
+            <div class="form-group">
+                <label>Identität</label>
+                <input type="text" id="userInput" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Passwort</label>
+                <input type="password" id="passInput">
+            </div>
+            <button class="btn-full" onclick="core.login()">Authentifizieren</button>
+            <div id="error-msg"></div>
+        </div>
+    </div>
+
+    <nav class="nav-header" id="mainNav">
+        <div class="nav-item active" onclick="core.switchView('calc')">Rechner</div>
+        <div class="nav-item" onclick="core.switchView('loans')">Finanzakte</div>
+        <div class="nav-item admin-only" id="nav-admin" onclick="core.switchView('admin')">Leitung</div>
+        <div class="nav-item admin-only" id="nav-bl" onclick="core.switchView('blacklist')">Blacklist</div>
+        <div class="nav-item" onclick="location.reload()">Abmelden</div>
+    </nav>
+
+    <div class="main-content" id="mainContent">
+        
+        <div id="view-calc" class="view active">
+            <div class="card">
+                <h2>Kreditberechnung</h2>
+                <div class="grid-2">
+                    <div>
+                        <div class="form-group">
+                            <label>Kreditnehmer Kategorie</label>
+                            <select id="k-typ" onchange="core.calculate()">
+                                <option value="civ">Zivilist (Limit $150.000)</option>
+                                <option value="bus">Unternehmen (Limit $1.000.000)</option>
+                                <option value="gov">Regierung (Limit $10.000.000)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Kreditsumme ($)</label>
+                            <input type="number" id="k-sum" value="50000" oninput="core.calculate()">
+                        </div>
+                        <div class="form-group">
+                            <label>Laufzeit (Wochen)</label>
+                            <input type="number" id="k-term" value="4" oninput="core.calculate()">
+                        </div>
+                        <div class="form-group">
+                            <label>Abbuchungszyklus (Stunden)</label>
+                            <input type="number" id="k-cycle" value="24" oninput="core.calculate()">
+                        </div>
+                        <div class="form-group">
+                            <label>Empfehlungen (Kunden geworben, max 10)</label>
+                            <input type="number" id="k-ref" value="0" min="0" max="10" oninput="core.calculate()">
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="k-ins" onchange="core.calculate()">
+                                <span>Unternehmenskauf / Gebühr (+$20.000)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="result-panel">
+                            <div class="result-row"><span class="result-label">Status:</span> <span class="result-val" id="res-status">Bereit</span></div>
+                            <div class="result-row"><span class="result-label">Abbuchungen gesamt:</span> <span class="result-val" id="res-count">0</span></div>
+                            <div class="result-row"><span class="result-label">Zins pro Zyklus:</span> <span class="result-val" id="res-zins-cycle">$0</span></div>
+                            <div class="result-row"><span class="result-label">Rate pro Abbuchung:</span> <span class="result-val" id="res-rate">$0</span></div>
+                            <div class="result-row"><span class="result-label">Gesamtzins:</span> <span class="result-val" id="res-zins-total">$0</span></div>
+                            <div class="result-row" style="border-top: 1px solid var(--accent); margin-top: 10px;"><span class="result-label">Gesamtrückzahlung:</span> <span class="result-val" id="res-total">$0</span></div>
+                            <div class="result-row"><span class="result-label">Vermittler Anteil (20%):</span> <span class="result-val" id="res-broker">$0</span></div>
+                        </div>
+
+                        <div style="margin-top: 30px;">
+                            <label>Name des Kreditnehmers</label>
+                            <input type="text" id="k-name" placeholder="Vollständiger Name">
+                            <button class="btn-full" style="margin-top: 15px;" onclick="core.saveLoan()">In Akte aufnehmen</button>
+                        </div>
+
+                        <div class="qol-copy" id="copy-summary">Zahlen eingeben für Zusammenfassung...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-loans" class="view">
+            <div class="card">
+                <h2>Finanzakte (Kreditübersicht)</h2>
+                <div class="form-group">
+                    <input type="text" id="loanSearch" placeholder="Suche in den Akten..." oninput="core.renderLoans()">
+                </div>
+                <div style="overflow-x: auto;">
+                    <table id="loanTable">
+                        <thead>
+                            <tr>
+                                <th>Kunde</th>
+                                <th>Summe</th>
+                                <th>Rückzahlung</th>
+                                <th>Status</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-admin" class="view">
+            <div class="card">
+                <h2>Account-Management</h2>
+                <div class="grid-2">
+                    <div>
+                        <div class="form-group">
+                            <label>Benutzername</label>
+                            <input type="text" id="acc-u">
+                        </div>
+                        <div class="form-group">
+                            <label>Passwort</label>
+                            <input type="password" id="acc-p">
+                        </div>
+                        <div class="form-group">
+                            <label>Rang</label>
+                            <select id="acc-l">
+                                <option value="user">Mitarbeiter</option>
+                                <option value="admin">Leitungsebene</option>
+                            </select>
+                        </div>
+                        <button class="btn-full" onclick="core.manageAcc()">Account Erstellen / Aktualisieren</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table id="accTable">
+                            <thead><tr><th>Name</th><th>Rang</th><th>Aktion</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Archivierte Kredite</h2>
+                <div id="archiveContent">Keine Einträge.</div>
+            </div>
+        </div>
+
+        <div id="view-blacklist" class="view">
+            <div class="card">
+                <h2>Blacklist</h2>
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <input type="text" id="bl-input" placeholder="Name oder Firma">
+                    <button onclick="core.addBlacklist()">Sperren</button>
+                </div>
+                <div id="bl-container"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        &mdash; Sterling Holding &mdash;<br>
+        Vertrauliche Finanzverwaltung v2.0
+    </footer>
+
+    <script>
+        const core = {
+            currentUser: null,
+            data: {
+                users: [{u: 'Leitung', p: 'PeterDerCoole', l: 'admin'}],
+                loans: [],
+                archive: [],
+                blacklist: []
+            },
+
+            login() {
+                const u = document.getElementById('userInput').value;
+                const p = document.getElementById('passInput').value;
+                const acc = this.data.users.find(x => x.u === u && x.p === p);
+
+                if (acc) {
+                    this.currentUser = acc;
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('mainNav').style.display = 'flex';
+                    document.getElementById('mainContent').style.display = 'block';
+                    
+                    if (acc.l !== 'admin') {
+                        document.getElementById('nav-admin').style.display = 'none';
+                        document.getElementById('nav-bl').style.display = 'none';
+                    }
+                    this.calculate();
+                } else {
+                    document.getElementById('error-msg').innerText = "Zugriff verweigert. Identität konnte nicht bestätigt werden.";
+                }
+            },
+
+            switchView(viewId) {
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                
+                document.getElementById('view-' + viewId).classList.add('active');
+                event.target.classList.add('active');
+
+                if (viewId === 'loans') this.renderLoans();
+                if (viewId === 'admin') this.renderAdmin();
+                if (viewId === 'blacklist') this.renderBlacklist();
+            },
+
+            calculate() {
+                const sum = parseFloat(document.getElementById('k-sum').value) || 0;
+                const type = document.getElementById('k-typ').value;
+                const term = parseFloat(document.getElementById('k-term').value) || 1;
+                const cycle = parseFloat(document.getElementById('k-cycle').value) || 24;
+                const refs = Math.min(parseFloat(document.getElementById('k-ref').value) || 0, 10);
+                const isInsured = document.getElementById('k-ins').checked;
+
+                const limits = { civ: 150000, bus: 1000000, gov: 10000000 };
+                const statEl = document.getElementById('res-status');
+                
+                if (sum > limits[type]) {
+                    statEl.innerText = "LIMIT ÜBERSCHRITTEN";
+                    statEl.style.color = "var(--danger)";
+                    return;
+                }
+                statEl.innerText = "Gültig";
+                statEl.style.color = "var(--success)";
+
+                let base = 12;
+                if (sum >= 300000) base = 8;
+                else if (sum >= 100000) base = 10;
+
+                const durationAdd = (term * 7 <= 30) ? 4 : 8;
+                const finalZinsSatz = base + durationAdd - (refs * 0.2);
+                
+                const totalZins = sum * (finalZinsSatz / 100);
+                const extraFee = (isInsured) ? 20000 : 0;
+                const totalRepay = sum + totalZins + extraFee;
+                
+                const hours = term * 7 * 24;
+                const count = Math.max(Math.floor(hours / cycle), 1);
+
+                document.getElementById('res-count').innerText = count;
+                document.getElementById('res-zins-cycle').innerText = "$" + (totalZins / count).toLocaleString();
+                document.getElementById('res-rate').innerText = "$" + (totalRepay / count).toLocaleString();
+                document.getElementById('res-zins-total').innerText = "$" + totalZins.toLocaleString();
+                document.getElementById('res-total').innerText = "$" + totalRepay.toLocaleString();
+                document.getElementById('res-broker').innerText = "$" + (totalZins * 0.2).toLocaleString();
+
+                document.getElementById('copy-summary').innerText = 
+                    `Sterling Holding | Kreditdetails\nSumme: $${sum.toLocaleString()}\nTyp: ${type.toUpperCase()}\nRate: $${(totalRepay/count).toLocaleString()}\nZyklen: ${count}\nRückzahlung: $${totalRepay.toLocaleString()}`;
+            },
+
+            saveLoan() {
+                const name = document.getElementById('k-name').value;
+                if (!name) return alert("Kundenname erforderlich.");
+                if (this.data.blacklist.includes(name)) return alert("Kunde steht auf der Blacklist!");
+
+                const sum = document.getElementById('k-sum').value;
+                const repay = document.getElementById('res-total').innerText.replace('$', '').replace(/,/g, '');
+
+                this.data.loans.push({
+                    id: Date.now(),
+                    name,
+                    sum: parseFloat(sum),
+                    repay: parseFloat(repay),
+                    status: 'unpaid'
+                });
+
+                alert("Kredit wurde in die Finanzakte aufgenommen.");
+                document.getElementById('k-name').value = "";
+            },
+
+            renderLoans() {
+                const q = document.getElementById('loanSearch').value.toLowerCase();
+                const tbody = document.querySelector('#loanTable tbody');
+                tbody.innerHTML = "";
+
+                this.data.loans.filter(l => l.name.toLowerCase().includes(q)).forEach(l => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${l.name}</td>
+                        <td>$${l.sum.toLocaleString()}</td>
+                        <td>$${l.repay.toLocaleString()}</td>
+                        <td><span class="status-badge ${l.status}">${l.status}</span></td>
+                        <td>
+                            ${this.currentUser.l === 'admin' ? `
+                                <button class="qol-copy" style="margin:0; padding:5px" onclick="core.setStatus(${l.id}, 'paid')">Bezahlt</button>
+                                <button class="qol-copy" style="margin:0; padding:5px" onclick="core.setStatus(${l.id}, 'withdrawn')">Gezogen</button>
+                                <button class="qol-copy" style="margin:0; padding:5px" onclick="core.archiveLoan(${l.id})">Archiv</button>
+                            ` : '-'}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            },
+
+            setStatus(id, s) {
+                const l = this.data.loans.find(x => x.id === id);
+                if (l) l.status = s;
+                this.renderLoans();
+            },
+
+            archiveLoan(id) {
+                const idx = this.data.loans.findIndex(x => x.id === id);
+                if (idx > -1) {
+                    this.data.archive.push(this.data.loans[idx]);
+                    this.data.loans.splice(idx, 1);
+                    this.renderLoans();
+                }
+            },
+
+            renderAdmin() {
+                const tbody = document.querySelector('#accTable tbody');
+                tbody.innerHTML = "";
+                this.data.users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${u.u}</td><td>${u.l}</td><td><button style="padding:5px" onclick="core.delAcc('${u.u}')">Löschen</button></td>`;
+                    tbody.appendChild(tr);
+                });
+
+                const arch = document.getElementById('archiveContent');
+                arch.innerHTML = this.data.archive.length ? "" : "Keine Einträge.";
+                this.data.archive.forEach(a => {
+                    arch.innerHTML += `<div style="font-size:0.8rem; color:#555; padding:5px; border-bottom:1px solid #111">${a.name} - $${a.sum.toLocaleString()} (${a.status})</div>`;
+                });
+            },
+
+            manageAcc() {
+                const u = document.getElementById('acc-u').value;
+                const p = document.getElementById('acc-p').value;
+                const l = document.getElementById('acc-l').value;
+                if (!u || !p) return;
+
+                const ex = this.data.users.find(x => x.u === u);
+                if (ex) { ex.p = p; ex.l = l; } 
+                else { this.data.users.push({u, p, l}); }
+                
+                this.renderAdmin();
+                document.getElementById('acc-u').value = "";
+                document.getElementById('acc-p').value = "";
+            },
+
+            delAcc(u) {
+                if (u === 'Leitung') return alert("Hauptleitung unantastbar.");
+                this.data.users = this.data.users.filter(x => x.u !== u);
+                this.renderAdmin();
+            },
+
+            renderBlacklist() {
+                const c = document.getElementById('bl-container');
+                c.innerHTML = "";
+                this.data.blacklist.forEach(b => {
+                    c.innerHTML += `
+                        <div class="blacklist-card">
+                            <span style="color:var(--danger)">${b}</span>
+                            <button style="padding:5px" onclick="core.remBlacklist('${b}')">Entsperren</button>
+                        </div>`;
+                });
+            },
+
+            addBlacklist() {
+                const n = document.getElementById('bl-input').value;
+                if (n && !this.data.blacklist.includes(n)) {
+                    this.data.blacklist.push(n);
+                    document.getElementById('bl-input').value = "";
+                    this.renderBlacklist();
+                }
+            },
+
+            remBlacklist(n) {
+                this.data.blacklist = this.data.blacklist.filter(x => x !== n);
+                this.renderBlacklist();
+            }
+        };
+    </script>
+</body>
+</html>
